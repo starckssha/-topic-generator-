@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>🔥 小红书爆文发布助手</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .post-card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+
+        .post-card:active {
+            transform: scale(0.98);
+        }
+
+        .post-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .post-id {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .post-category {
+            background: #f0f0f0;
+            color: #666;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+        }
+
+        .post-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 12px;
+            line-height: 1.5;
+        }
+
+        .post-title-type {
+            display: inline-block;
+            background: #ff6b6b;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-right: 8px;
+        }
+
+        .post-content {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 15px;
+            max-height: 100px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 4;
+            -webkit-box-orient: vertical;
+        }
+
+        .post-suggestions {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 13px;
+        }
+
+        .suggestion-label {
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .suggestion-text {
+            color: #666;
+            line-height: 1.5;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ff5252 100%);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #666;
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: white;
+        }
+
+        .spinner {
+            border: 3px solid rgba(255,255,255,0.3);
+            border-top: 3px solid white;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            text-align: center;
+            color: #ff6b6b;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .modal-body {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.8;
+            white-space: pre-wrap;
+        }
+
+        .modal-close {
+            margin-top: 20px;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔥 爆文内容发布助手</h1>
+            <p>一键发布精选爆文到内容库</p>
+        </div>
+
+        <div id="posts-container">
+            <div class="loading">
+                <div class="spinner"></div>
+                <p>加载爆文清单...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 内容预览弹窗 -->
+    <div id="content-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-title">📄 爆文内容预览</div>
+            <div class="modal-body" id="modal-body"></div>
+            <button class="btn btn-primary modal-close" onclick="closeModal()">关闭</button>
+        </div>
+    </div>
+
+    <script>
+        // API基础URL
+        const API_BASE = window.location.protocol + '//' + window.location.host;
+
+        // 加载爆文列表
+        async function loadPosts() {
+            try {
+                const response = await fetch(`${API_BASE}/api/posts`);
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    displayPosts(result.data.posts);
+                } else {
+                    showError('加载失败: ' + result.message);
+                }
+            } catch (error) {
+                showError('网络错误: ' + error.message);
+            }
+        }
+
+        // 显示爆文列表
+        function displayPosts(posts) {
+            const container = document.getElementById('posts-container');
+
+            if (posts.length === 0) {
+                container.innerHTML = '<div class="error">暂无爆文数据</div>';
+                return;
+            }
+
+            let html = '';
+            posts.forEach(post => {
+                html += `
+                    <div class="post-card">
+                        <div class="post-header">
+                            <span class="post-id">#${post.id}</span>
+                            <span class="post-category">${post.category}</span>
+                        </div>
+                        <div class="post-title">
+                            <span class="post-title-type">${post.title_type}</span>
+                            ${post.title}
+                        </div>
+                        <div class="post-content">${post.content.substring(0, 150)}...</div>
+                        <div class="post-suggestions">
+                            <div class="suggestion-label">📸 建议配图:</div>
+                            <div class="suggestion-text">${post.image_suggestions.split(' | ')[0]}</div>
+                        </div>
+                        <div class="btn-group">
+                            <button class="btn btn-secondary" onclick="viewContent(${post.id})">👀 预览</button>
+                            <button class="btn btn-primary" onclick="publishToCompany(${post.id})">🚀 发布到内容库</button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        // 预览内容
+        async function viewContent(postId) {
+            try {
+                const response = await fetch(`${API_BASE}/api/posts/${postId}`);
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    document.getElementById('modal-body').textContent = result.data.content;
+                    document.getElementById('content-modal').classList.add('active');
+                }
+            } catch (error) {
+                alert('加载失败: ' + error.message);
+            }
+        }
+
+        // 关闭弹窗
+        function closeModal() {
+            document.getElementById('content-modal').classList.remove('active');
+        }
+
+        // 发布到公司内容库
+        async function publishToCompany(postId) {
+            try {
+                // 确认发布
+                if (!confirm('确认将此爆文发布到内容库吗？')) {
+                    return;
+                }
+
+                // 显示加载提示
+                const loadingDiv = document.createElement('div');
+                loadingDiv.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.8);color:white;padding:20px;border-radius:10px;z-index:9999;';
+                loadingDiv.textContent = '⏳ 正在发布...';
+                document.body.appendChild(loadingDiv);
+
+                // 调用发布API
+                const response = await fetch(`${API_BASE}/api/publish-to-company`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        post_id: postId
+                    })
+                });
+
+                // 移除加载提示
+                document.body.removeChild(loadingDiv);
+
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    alert('✅ 发布成功！\n\n' + JSON.stringify(result.data, null, 2));
+                } else {
+                    alert('❌ 发布失败: ' + result.message);
+                }
+
+            } catch (error) {
+                alert('❌ 发布出错: ' + error.message);
+            }
+        }
+
+        // 显示错误
+        function showError(message) {
+            document.getElementById('posts-container').innerHTML = `
+                <div class="error">
+                    <p>${message}</p>
+                    <p style="margin-top: 20px; font-size: 14px; color: #999;">请检查后端服务是否正常运行</p>
+                </div>
+            `;
+        }
+
+        // 页面加载时获取数据
+        window.onload = function() {
+            loadPosts();
+        };
+    </script>
+</body>
+</html>

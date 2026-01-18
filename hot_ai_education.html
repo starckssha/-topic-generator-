@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>AI+教育热点话题</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px 15px;
+        }
+        .header { text-align: center; color: white; margin-bottom: 25px; }
+        .header h1 { font-size: 28px; margin-bottom: 8px; text-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .stats { text-align: center; color: white; font-size: 14px; margin-bottom: 20px; opacity: 0.9; }
+        .content-list { max-width: 600px; margin: 0 auto; display: flex; flex-direction: column; gap: 15px; }
+        .card { background: white; border-radius: 16px; padding: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .category { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600; display: inline-block; margin-bottom: 10px; }
+        .platform { background: #f0f0f0; color: #666; padding: 4px 12px; border-radius: 12px; font-size: 12px; display: inline-block; margin-bottom: 10px; margin-left: 8px; }
+        .title { font-size: 18px; font-weight: 600; color: #333; margin-bottom: 10px; line-height: 1.4; }
+        .heat { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 3px 10px; border-radius: 10px; font-size: 12px; font-weight: 600; display: inline-block; margin-bottom: 10px; }
+        .image-container { margin: 10px 0; border-radius: 12px; overflow: hidden; position: relative; }
+        .image-container img { width: 100%; height: auto; display: block; }
+        .text { font-size: 14px; color: #666; line-height: 1.6; margin-bottom: 15px; white-space: pre-wrap; }
+        .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+        .tag { background: #f0f0f0; color: #666; padding: 4px 12px; border-radius: 12px; font-size: 12px; }
+        .btn { width: 100%; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; border: none; padding: 12px; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; margin-bottom: 8px; }
+        .btn-secondary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .instructions { background: #f8f9fa; border-radius: 12px; padding: 12px; margin-top: 10px; font-size: 12px; color: #666; }
+        .instructions ol { margin-left: 20px; margin-top: 8px; }
+        .instructions li { margin-bottom: 4px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🤖 AI+教育热点</h1>
+        <p>精选AI和教育相关话题 | 2026-01-13</p>
+    </div>
+    <div class="stats">📊 加载中...</div>
+    <div class="content-list" id="list"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.11/dist/clipboard.min.js"></script>
+    <script>
+        const topics = [
+            {
+                "platform": "Hacker News",
+                "title": "Cowork: Claude Code for the rest of your work",
+                "text": "Cowork: Claude Code for the rest of your work\n\n🤖 AI圈又出大事了！\n\n这个话题真的太火了🔥\n作为开发者/学习者必须了解！\n\n💡 核心看点：\n• 前沿AI技术动态\n• 开发者必备知识\n• 行业趋势分析\n\n📚 为什么值得关注？\nAI时代，这个话题关乎每个人的未来！\n\n👇 点赞收藏，持续获取AI干货！\n\n#AI #人工智能 #ChatGPT #Claude #技术分享 #干货",
+                "heat": 990,
+                "tags": ["热点", "干货", "分享", "AI", "人工智能"],
+                "image": "https://placehold.co/600x400/667eea/white?text=Cowork%3A%20Claude%20Code&font=roboto",
+                "category": "AI前沿"
+            },
+            {
+                "platform": "Hacker News",
+                "title": "Apple picks Gemini to power Siri",
+                "text": "Apple picks Gemini to power Siri\n\n🤖 AI圈又出大事了！\n\n这个话题真的太火了🔥\n作为开发者/学习者必须了解！\n\n💡 核心看点：\n• 前沿AI技术动态\n• 开发者必备知识\n• 行业趋势分析\n\n📚 为什么值得关注？\nAI时代，这个话题关乎每个人的未来！\n\n👇 点赞收藏，持续获取AI干货！\n\n#AI #人工智能 #ChatGPT #Claude #技术分享 #干货",
+                "heat": 858,
+                "tags": ["热点", "干货", "分享", "AI", "人工智能"],
+                "image": "https://placehold.co/600x400/667eea/white?text=Apple%20picks%20Gemini&font=roboto",
+                "category": "AI前沿"
+            },
+            {
+                "platform": "Hacker News",
+                "title": "TimeCapsuleLLM: LLM trained only on data from 1800-1875",
+                "text": "TimeCapsuleLLM: LLM trained only on data from 1800-1875\n\n🤖 AI圈又出大事了！\n\n这个话题真的太火了🔥\n作为开发者/学习者必须了解！\n\n💡 核心看点：\n• 前沿AI技术动态\n• 开发者必备知识\n• 行业趋势分析\n\n📚 为什么值得关注？\nAI时代，这个话题关乎每个人的未来！\n\n👇 点赞收藏，持续获取AI干货！\n\n#AI #人工智能 #ChatGPT #Claude #技术分享 #干货",
+                "heat": 622,
+                "tags": ["热点", "干货", "分享", "AI", "人工智能"],
+                "image": "https://placehold.co/600x400/667eea/white?text=TimeCapsuleLLM&font=roboto",
+                "category": "AI前沿"
+            },
+            {
+                "platform": "Hacker News",
+                "title": "LLVM: The bad parts",
+                "text": "LLVM: The bad parts\n\n💻 程序员必看！\n\n这个技术话题太有价值了✨\n\n🔥 核心要点：\n• 实战开发技巧\n• 最佳实践经验\n• 技术深度解析\n\n💪 适用人群：\n✅ 开发者\n✅ 编程学习者\n✅ 技术爱好者\n\n📚 持续学习，一起进步！\n\n#编程 #开发 #代码 #程序员 #技术干货 #学习",
+                "heat": 341,
+                "tags": ["热点", "干货", "分享", "编程", "开发"],
+                "image": "https://placehold.co/600x400/667eea/white?text=LLVM%3A%20The%20bad%20parts&font=roboto",
+                "category": "编程开发"
+            },
+            {
+                "platform": "Hacker News",
+                "title": "Unauthenticated remote code execution in OpenCode",
+                "text": "Unauthenticated remote code execution in OpenCode\n\n💻 程序员必看！\n\n这个技术话题太有价值了✨\n\n🔥 核心要点：\n• 实战开发技巧\n• 最佳实践经验\n• 技术深度解析\n\n💪 适用人群：\n✅ 开发者\n✅ 编程学习者\n✅ 技术爱好者\n\n📚 持续学习，一起进步！\n\n#编程 #开发 #代码 #程序员 #技术干货 #学习",
+                "heat": 337,
+                "tags": ["热点", "干货", "分享", "编程", "开发"],
+                "image": "https://placehold.co/600x400/667eea/white?text=Remote%20Code%20Execution&font=roboto",
+                "category": "编程开发"
+            }
+        ];
+
+        // 复制文字到剪贴板
+        async function copyText(text) {
+            try {
+                await navigator.clipboard.writeText(text);
+                return true;
+            } catch {
+                const ta = document.createElement('textarea');
+                ta.value = text;
+                ta.style.position = 'fixed';
+                ta.style.opacity = '0';
+                document.body.appendChild(ta);
+                ta.select();
+                const success = document.execCommand('copy');
+                document.body.removeChild(ta);
+                return success;
+            }
+        }
+
+        // 尝试复制图片（通过 fetch + clipboard）
+        async function copyImage(imageUrl) {
+            try {
+                if (!navigator.clipboard || !window.ClipboardItem) {
+                    return false;
+                }
+
+                const response = await fetch(imageUrl);
+                const blob = await response.blob();
+
+                await navigator.clipboard.write([
+                    new ClipboardItem({
+                        [blob.type]: blob
+                    })
+                ]);
+                return true;
+            } catch (e) {
+                console.log('图片复制失败:', e);
+                return false;
+            }
+        }
+
+        // 打开小红书APP
+        function openXiaohongshu() {
+            const schemes = [
+                'xhsdiscover://post_note/',
+                'xhsdiscover://post/',
+                'xhsdiscover://',
+                'xhs://'
+            ];
+
+            // 创建隐藏的iframe尝试唤起
+            const iframe = document.createElement('iframe');
+            iframe.style.display = 'none';
+            document.body.appendChild(iframe);
+
+            let idx = 0;
+            function tryNext() {
+                if (idx < schemes.length) {
+                    iframe.src = schemes[idx++];
+                    setTimeout(tryNext, 500);
+                } else {
+                    document.body.removeChild(iframe);
+                }
+            }
+            tryNext();
+
+            // 直接跳转
+            setTimeout(() => {
+                window.location.href = schemes[0];
+            }, 1000);
+
+            // 备用：打开网页版
+            setTimeout(() => {
+                window.open('https://www.xiaohongshu.com', '_blank');
+            }, 3000);
+        }
+
+        // 发布函数
+        async function publish(item) {
+            const text = `${item.title}\n\n${item.text}\n\n${item.tags.map(t => '#' + t).join(' ')}`;
+
+            // 步骤1：复制文字
+            const textCopied = await copyText(text);
+
+            // 步骤2：尝试复制图片（仅支持HTTPS和现代浏览器）
+            const imageCopied = await copyImage(item.image);
+
+            // 显示提示
+            let message = '✅ 文字已复制到剪贴板！\n\n';
+            message += imageCopied ? '✅ 图片也已复制！\n\n' : '⚠️ 图片复制失败（需要手动添加）\n\n';
+            message += '接下来：\n';
+            message += '1. 点击"打开小红书"按钮\n';
+            message += '2. 在发布页长按粘贴文字\n';
+            if (!imageCopied) {
+                message += '3. 手动选择图片（或保存配图后添加）\n';
+            }
+            message += '4. 发布';
+
+            alert(message);
+
+            // 自动唤起小红书
+            setTimeout(() => {
+                openXiaohongshu();
+            }, 1500);
+        }
+
+        // 仅打开小红书
+        function openOnly(item) {
+            const text = `${item.title}\n\n${item.text}\n\n${item.tags.map(t => '#' + t).join(' ')}`;
+            copyText(text);
+            alert('✅ 文字已复制！\n\n正在打开小红书...');
+            setTimeout(() => {
+                openXiaohongshu();
+            }, 500);
+        }
+
+        // 渲染页面
+        function render() {
+            document.querySelector('.stats').textContent = '📊 共 ' + topics.length + ' 个AI+教育话题';
+
+            const listEl = document.getElementById('list');
+            listEl.innerHTML = topics.map(item => `
+                <div class="card">
+                    <span class="category">${item.category || 'AI+教育'}</span>
+                    <span class="platform">${item.platform}</span>
+                    <div class="title">${item.title}</div>
+                    <div class="heat">🔥 热度 ${item.heat}</div>
+                    ${item.image ? `<div class="image-container"><img src="${item.image}" alt="配图"></div>` : ''}
+                    <div class="tags">${item.tags.map(t => `<span class="tag">#${t}</span>`).join('')}</div>
+                    <div class="text">${item.text}</div>
+                    <button class="btn" onclick="publish(topics[${topics.indexOf(item)}])">📱 复制并打开小红书</button>
+                    <button class="btn btn-secondary" onclick="openOnly(topics[${topics.indexOf(item)}])">🔗 仅打开小红书</button>
+                    <div class="instructions">
+                        <strong>💡 使用提示：</strong>
+                        <ol>
+                            <li>点击按钮复制文字</li>
+                            <li>小红书会自动打开</li>
+                            <li>在发布页长按粘贴</li>
+                            <li>添加配图后发布</li>
+                        </ol>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 页面加载完成后渲染
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', render);
+        } else {
+            render();
+        }
+    </script>
+</body>
+</html>

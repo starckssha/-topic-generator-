@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>🔥 今日热点 - 小红书</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px 15px;
+        }
+        .header { text-align: center; color: white; margin-bottom: 25px; }
+        .header h1 { font-size: 28px; margin-bottom: 8px; text-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .stats { text-align: center; color: white; font-size: 14px; margin-bottom: 20px; opacity: 0.9; }
+        .content-list { max-width: 600px; margin: 0 auto; display: flex; flex-direction: column; gap: 15px; }
+        .card { background: white; border-radius: 16px; padding: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .platform { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600; display: inline-block; margin-bottom: 10px; }
+        .title { font-size: 18px; font-weight: 600; color: #333; margin-bottom: 10px; line-height: 1.4; }
+        .heat { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 3px 10px; border-radius: 10px; font-size: 12px; font-weight: 600; display: inline-block; margin-bottom: 10px; }
+        .text { font-size: 14px; color: #666; line-height: 1.6; margin-bottom: 15px; white-space: pre-wrap; }
+        .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+        .tag { background: #f0f0f0; color: #666; padding: 4px 12px; border-radius: 12px; font-size: 12px; }
+        .btn { width: 100%; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; border: none; padding: 12px; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🔥 今日热点</h1>
+        <p>一键发布到小红书 | 2026-01-13 19:09</p>
+    </div>
+    <div class="stats">📊 共 62 个热点话题</div>
+    <div class="content-list" id="list"></div>
+
+    <script>
+        const topics = [
+            {
+                platform: "Hacker News",
+                title: "Claude Code 推出 Cowork 功能",
+                text: "Claude 推出 Cowork 功能！让 AI 协作更高效 💼\n\n🔥 核心特性：\n• 智能代码协作\n• 多任务并行处理\n• 实时代码审查\n• 自动化工作流\n\n开发者必备神器！效率提升300%！",
+                heat: 990,
+                tags: ["AI", "Claude", "编程", "效率工具"]
+            },
+            {
+                platform: "Hacker News",
+                title: "苹果选择谷歌 Gemini 驱动 Siri",
+                text: "苹果选择谷歌的 Gemini AI 来驱动 Siri 🍎🤖\n\n要点：\n• 苹果与谷歌达成AI合作\n• Gemini将集成到Siri中\n• 预计在iOS更新中推出\n\n科技圈炸锅了！",
+                heat: 858,
+                tags: ["苹果", "谷歌", "AI", "Siri"]
+            },
+            {
+                platform: "Hacker News",
+                title: "软盘是最好的儿童电视遥控器",
+                text: "软盘竟然是最好的儿童电视遥控器？💾📺\n\n😂 父母的智慧：\n• 软盘当遥控器，孩子抢不走\n• 简单易懂，没有复杂按钮\n• 耐用抗摔，经典设计",
+                heat: 641,
+                tags: ["育儿", "科技", "生活", "创意"]
+            },
+            {
+                platform: "今日头条",
+                title: "中方就 G7 稀土言论表态",
+                text: "中方就 G7 稀土言论表态 🇨🇳\n\n• G7 发表稀土相关言论\n• 中方迅速作出回应\n• 稀土资源战略重要性凸显\n\n维护国家资源利益！",
+                heat: 5772,
+                tags: ["新闻", "国际", "稀土", "G7"]
+            },
+            {
+                platform: "今日头条",
+                title: "李在明会见高市早苗提历史伤痕",
+                text: "李在明会见高市早苗，开场提"历史伤痕" 🇰🇷\n\n• 韩日政治会晤引发关注\n• 历史问题再次成为焦点\n• 双方关系何去何从？\n\n历史的伤痕何时能愈合？",
+                heat: 5222,
+                tags: ["新闻", "国际", "韩国", "日本"]
+            },
+            {
+                platform: "今日头条",
+                title: "鼻病毒感染不能服用奥司他韦",
+                text: "鼻病毒感染不能自行服用奥司他韦 ⚠️\n\n• 医生提醒：药物不对症\n• 滥用抗病毒药有风险\n• 建议遵医嘱用药\n\n健康用药，科学治疗！",
+                heat: 4276,
+                tags: ["健康", "医疗", "科普"]
+            },
+            {
+                platform: "今日头条",
+                title: "59岁女子顺利诞下4斤4两男婴",
+                text: "59岁女子顺利诞下4斤4两男婴 👶\n\n• 高龄产妇成功生子\n• 母子平安健康\n• 创造医学奇迹\n\n生命的奇迹！祝福宝宝健康成长！",
+                heat: 3167,
+                tags: ["新闻", "社会", "母婴"]
+            },
+            {
+                platform: "今日头条",
+                title: "老干妈创始人出山救子又赚翻了",
+                text: "老干妈创始人出山救子又赚翻了 💰\n\n• 陶华碧重掌老干妈\n• 为解决儿子债务问题\n• 品牌业绩强势反弹\n\n民族品牌的传奇故事！",
+                heat: 2346,
+                tags: ["商业", "老干妈", "创业"]
+            },
+            {
+                platform: "今日头条",
+                title: "A股成交额突破3.64万亿再创新高",
+                text: "A股成交额突破3.64万亿再创新高 📈\n\n• 市场交易火爆\n• 成交额创历史新高\n• 投资者热情高涨\n\n股市沸腾！你参与了吗？",
+                heat: 1573,
+                tags: ["股市", "A股", "财经"]
+            },
+            {
+                platform: "B站",
+                title: "重拍了99次的镜头",
+                text: "重拍了99次的镜头！极致追求完美 🎬\n\n• 导演的执着与坚持\n• 99次NG背后的故事\n• 艺术创作的艰辛\n\n匠人精神让人敬佩！",
+                heat: 273,
+                tags: ["影视", "创作", "B站"]
+            }
+        ];
+
+        async function copy(text) {
+            try {
+                await navigator.clipboard.writeText(text);
+                return true;
+            } catch {
+                const ta = document.createElement('textarea');
+                ta.value = text;
+                document.body.appendChild(ta);
+                ta.select();
+                const success = document.execCommand('copy');
+                document.body.removeChild(ta);
+                return success;
+            }
+        }
+
+        function openXHS() {
+            window.location.href = 'xhsdiscover://post_note/';
+            setTimeout(() => window.open('https://www.xiaohongshu.com', '_blank'), 2000);
+        }
+
+        async function publish(item) {
+            const text = `${item.title}\n\n${item.text}\n\n${item.tags.map(t => '#' + t).join(' ')}`;
+            if (await copy(text)) {
+                alert('✅ 文字已复制！正在打开小红书...');
+                setTimeout(() => openXHS(), 1000);
+            }
+        }
+
+        function render() {
+            console.log('开始渲染...');
+            console.log('话题数量:', topics.length);
+
+            const listEl = document.getElementById('list');
+            console.log('list元素:', listEl);
+
+            if (!listEl) {
+                console.error('找不到list元素');
+                return;
+            }
+
+            const html = topics.map(item => `
+                <div class="card">
+                    <span class="platform">${item.platform}</span>
+                    <div class="title">${item.title}</div>
+                    <div class="heat">🔥 热度 ${item.heat}</div>
+                    <div class="tags">${item.tags.map(t => `<span class="tag">#${t}</span>`).join('')}</div>
+                    <div class="text">${item.text}</div>
+                    <button class="btn" onclick="publish(${JSON.stringify(item).replace(/"/g, '&quot;')})">📱 发布到小红书</button>
+                </div>
+            `).join('');
+
+            listEl.innerHTML = html;
+            console.log('渲染完成！');
+        }
+
+        console.log('脚本开始执行');
+        console.log('DOM状态:', document.readyState);
+
+        if (document.readyState === 'loading') {
+            console.log('等待DOM加载...');
+            document.addEventListener('DOMContentLoaded', render);
+        } else {
+            console.log('DOM已就绪，立即渲染');
+            render();
+        }
+    </script>
+</body>
+</html>

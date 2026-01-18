@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>内容生成器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: #000;
+            color: #fff;
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 300;
+            letter-spacing: 4px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 0.9rem;
+            color: #666;
+            letter-spacing: 2px;
+        }
+
+        /* 操作区域 */
+        .action-area {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-bottom: 40px;
+        }
+
+        .btn-step {
+            background: #fff;
+            color: #000;
+            border: 2px solid #fff;
+            padding: 15px 30px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-step:hover {
+            background: #000;
+            color: #fff;
+        }
+
+        .btn-step:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        /* 状态显示 */
+        .status {
+            text-align: center;
+            margin: 30px 0;
+            min-height: 40px;
+        }
+
+        .status-text {
+            font-size: 0.9rem;
+            color: #999;
+            letter-spacing: 1px;
+        }
+
+        /* 数据区域 */
+        .data-section {
+            margin-bottom: 50px;
+            display: none;
+        }
+
+        .data-section.active {
+            display: block;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #333;
+        }
+
+        .section-title {
+            font-size: 1.2rem;
+            font-weight: 300;
+            letter-spacing: 3px;
+        }
+
+        .section-count {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        /* 话题卡片 */
+        .topic-card {
+            border: 1px solid #333;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+        }
+
+        .topic-card:hover {
+            border-color: #fff;
+        }
+
+        .topic-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .topic-title {
+            font-size: 1rem;
+            font-weight: 500;
+            line-height: 1.6;
+            flex: 1;
+        }
+
+        .topic-meta {
+            font-size: 0.75rem;
+            color: #666;
+            text-align: right;
+            margin-left: 20px;
+            white-space: nowrap;
+        }
+
+        .topic-meta span {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        /* 爆文卡片 */
+        .post-card {
+            border: 1px solid #333;
+            padding: 25px;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+        }
+
+        .post-card:hover {
+            border-color: #fff;
+        }
+
+        .post-header {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #222;
+        }
+
+        .post-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+        .post-meta {
+            font-size: 0.8rem;
+            color: #666;
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .post-content {
+            font-size: 0.95rem;
+            line-height: 1.8;
+            color: #ccc;
+            margin-bottom: 20px;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .post-actions {
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn-copy {
+            flex: 1;
+            padding: 12px;
+            background: transparent;
+            border: 1px solid #333;
+            color: #999;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-copy:hover {
+            border-color: #fff;
+            color: #fff;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+
+        .empty-state p {
+            font-size: 0.9rem;
+            letter-spacing: 2px;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 20px 15px;
+            }
+
+            .action-area {
+                flex-direction: column;
+            }
+
+            .btn-step {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>内容生成器</h1>
+            <p>CONTENT GENERATOR</p>
+        </div>
+
+        <!-- 操作按钮 -->
+        <div class="action-area">
+            <button class="btn-step" id="fetchBtn" onclick="fetchTopics()">
+                1. 抓取热点
+            </button>
+            <button class="btn-step" id="filterBtn" onclick="filterTopics()" disabled>
+                2. 筛选话题
+            </button>
+            <button class="btn-step" id="generateBtn" onclick="generatePosts()" disabled>
+                3. 生成爆文
+            </button>
+        </div>
+
+        <!-- 状态显示 -->
+        <div class="status">
+            <div class="status-text" id="statusText">等待开始...</div>
+        </div>
+
+        <!-- 步骤1：抓取的热点 -->
+        <div class="data-section" id="fetchedSection">
+            <div class="section-header">
+                <div class="section-title">抓取的热点</div>
+                <div class="section-count" id="fetchedCount">0 条</div>
+            </div>
+            <div id="fetchedContainer"></div>
+        </div>
+
+        <!-- 步骤2：筛选的话题 -->
+        <div class="data-section" id="filteredSection">
+            <div class="section-header">
+                <div class="section-title">筛选的教育+AI话题</div>
+                <div class="section-count" id="filteredCount">0 条</div>
+            </div>
+            <div id="filteredContainer"></div>
+        </div>
+
+        <!-- 步骤3：生成的爆文 -->
+        <div class="data-section" id="generatedSection">
+            <div class="section-header">
+                <div class="section-title">生成的爆文</div>
+                <div class="section-count" id="generatedCount">0 条</div>
+            </div>
+            <div id="generatedContainer"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:5000/api';
+        let fetchedTopics = [];
+        let filteredTopics = [];
+
+        // 步骤1：抓取热点
+        async function fetchTopics() {
+            const btn = document.getElementById('fetchBtn');
+            const statusText = document.getElementById('statusText');
+            const section = document.getElementById('fetchedSection');
+            const container = document.getElementById('fetchedContainer');
+            const countEl = document.getElementById('fetchedCount');
+
+            btn.disabled = true;
+            btn.textContent = '抓取中...';
+            statusText.textContent = '正在抓取热点...';
+
+            try {
+                const response = await fetch(`${API_BASE}/fetch/start`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({async: false})
+                });
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    // 获取抓取的结果
+                    const batchId = result.batch_id;
+                    const fetchResult = await fetch(`${API_BASE}/fetch/results?batch_id=${batchId}`);
+                    const fetchData = await fetchResult.json();
+
+                    if (fetchData.status === 'success') {
+                        fetchedTopics = fetchData.data.topics || [];
+                        countEl.textContent = `${fetchedTopics.length} 条`;
+
+                        // 显示热点列表
+                        displayFetchedTopics(fetchedTopics);
+
+                        section.classList.add('active');
+                        statusText.textContent = `✓ 抓取完成，共 ${fetchedTopics.length} 条热点`;
+
+                        // 启用筛选按钮
+                        document.getElementById('filterBtn').disabled = false;
+                    }
+                }
+            } catch (error) {
+                statusText.textContent = `✗ 抓取失败: ${error.message}`;
+                console.error(error);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '1. 抓取热点';
+            }
+        }
+
+        // 步骤2：筛选话题
+        async function filterTopics() {
+            const btn = document.getElementById('filterBtn');
+            const statusText = document.getElementById('statusText');
+            const section = document.getElementById('filteredSection');
+            const container = document.getElementById('filteredContainer');
+            const countEl = document.getElementById('filteredCount');
+
+            btn.disabled = true;
+            btn.textContent = '筛选中...';
+            statusText.textContent = '正在筛选教育+AI话题...';
+
+            // 筛选逻辑
+            filteredTopics = fetchedTopics.filter(topic => {
+                const keywords = ['AI', '人工智能', '机器学习', 'ChatGPT', 'education', '教育', '学习', 'tech', '技术'];
+                const title = topic.title.toLowerCase();
+                return keywords.some(kw => title.toLowerCase().includes(kw.toLowerCase()));
+            });
+
+            countEl.textContent = `${filteredTopics.length} 条`;
+
+            // 显示筛选后的话题
+            displayFilteredTopics(filteredTopics);
+
+            section.classList.add('active');
+            statusText.textContent = `✓ 筛选完成，共 ${filteredTopics.length} 个教育+AI话题`;
+
+            // 启用生成按钮
+            document.getElementById('generateBtn').disabled = false;
+
+            btn.disabled = false;
+            btn.textContent = '2. 筛选话题';
+        }
+
+        // 步骤3：生成爆文
+        async function generatePosts() {
+            const btn = document.getElementById('generateBtn');
+            const statusText = document.getElementById('statusText');
+            const section = document.getElementById('generatedSection');
+            const container = document.getElementById('generatedContainer');
+            const countEl = document.getElementById('generatedCount');
+
+            btn.disabled = true;
+            btn.textContent = '生成中...';
+            statusText.textContent = '正在生成爆文...';
+
+            try {
+                const topicIds = filteredTopics.slice(0, 3).map(t => t.id);
+
+                const response = await fetch(`${API_BASE}/generate/start`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        topic_ids: topicIds,
+                        use_ai: true,
+                        async: false
+                    })
+                });
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    // 获取生成的爆文
+                    const batchId = result.batch_id;
+                    const postsResult = await fetch(`${API_BASE}/generate/posts?batch_id=${batchId}`);
+                    const postsData = await postsResult.json();
+
+                    if (postsData.status === 'success') {
+                        const posts = postsData.data.posts || [];
+                        countEl.textContent = `${posts.length} 条`;
+
+                        // 显示爆文
+                        displayGeneratedPosts(posts);
+
+                        section.classList.add('active');
+                        statusText.textContent = `✓ 生成完成，共 ${posts.length} 条爆文`;
+                    }
+                }
+            } catch (error) {
+                statusText.textContent = `✗ 生成失败: ${error.message}`;
+                console.error(error);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '3. 生成爆文';
+            }
+        }
+
+        // 显示抓取的热点
+        function displayFetchedTopics(topics) {
+            const container = document.getElementById('fetchedContainer');
+
+            if (topics.length === 0) {
+                container.innerHTML = '<div class="empty-state"><p>暂无热点</p></div>';
+                return;
+            }
+
+            let html = '';
+            topics.slice(0, 20).forEach((topic, index) => {
+                html += `
+                    <div class="topic-card">
+                        <div class="topic-header">
+                            <div class="topic-title">${index + 1}. ${escapeHtml(topic.title)}</div>
+                            <div class="topic-meta">
+                                <span>${topic.platform}</span>
+                                <span>热值: ${topic.hot_value || topic.rank || '-'}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            if (topics.length > 20) {
+                html += '<div class="empty-state"><p>...还有更多</p></div>';
+            }
+
+            container.innerHTML = html;
+        }
+
+        // 显示筛选后的话题
+        function displayFilteredTopics(topics) {
+            const container = document.getElementById('filteredContainer');
+
+            if (topics.length === 0) {
+                container.innerHTML = '<div class="empty-state"><p>未找到教育+AI相关话题</p></div>';
+                return;
+            }
+
+            let html = '';
+            topics.forEach((topic, index) => {
+                html += `
+                    <div class="topic-card">
+                        <div class="topic-header">
+                            <div class="topic-title">✓ ${index + 1}. ${escapeHtml(topic.title)}</div>
+                            <div class="topic-meta">
+                                <span>${topic.platform}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        // 显示生成的爆文
+        function displayGeneratedPosts(posts) {
+            const container = document.getElementById('generatedContainer');
+
+            if (posts.length === 0) {
+                container.innerHTML = '<div class="empty-state"><p>暂无爆文</p></div>';
+                return;
+            }
+
+            let html = '';
+            posts.forEach(post => {
+                html += `
+                    <div class="post-card">
+                        <div class="post-header">
+                            <div class="post-title">${escapeHtml(post.recommended_title)}</div>
+                            <div class="post-meta">
+                                <span>${post.title_type}</span>
+                                <span>${post.source_platform}</span>
+                            </div>
+                        </div>
+                        <div class="post-content">${escapeHtml(post.content)}</div>
+                        <div class="post-actions">
+                            <button class="btn-copy" onclick="copyContent('${post.id}')">复制内容</button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        // 复制内容
+        async function copyContent(postId) {
+            try {
+                const response = await fetch(`${API_BASE}/generate/posts/${postId}`);
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    const post = result.data;
+                    const text = `${post.recommended_title}\n\n${post.content}`;
+                    await navigator.clipboard.writeText(text);
+                    alert('已复制到剪贴板');
+                }
+            } catch (error) {
+                alert('复制失败');
+            }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('Content Generator Ready');
+        });
+    </script>
+</body>
+</html>

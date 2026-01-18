@@ -1,0 +1,20 @@
+# 小红书爆文发布系统 - Python依赖包
+
+# Web框架
+flask>=3.0.0
+flask-cors>=4.0.0
+
+# 数据处理
+pandas>=2.0.0
+
+# 二维码生成
+qrcode>=7.4.0
+
+# 图片处理
+Pillow>=10.0.0
+
+# 网络请求（已有）
+requests>=2.31.0
+
+# CSV处理（已有）
+python-dateutil>=2.8.0

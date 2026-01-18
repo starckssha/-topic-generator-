@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>今日热点</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, sans-serif; background: linear-gradient(135deg, #667eea, #764ba2); min-height: 100vh; padding: 20px 15px; }
+        .header { text-align: center; color: white; margin-bottom: 25px; }
+        .header h1 { font-size: 28px; margin-bottom: 8px; }
+        .stats { text-align: center; color: white; font-size: 14px; margin-bottom: 20px; }
+        .card { background: white; border-radius: 16px; padding: 15px; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .platform { background: #667eea; color: white; padding: 4px 12px; border-radius: 12px; font-size: 12px; display: inline-block; margin-bottom: 10px; }
+        .title { font-size: 18px; font-weight: 600; color: #333; margin-bottom: 10px; }
+        .heat { background: linear-gradient(135deg, #f093fb, #f5576c); color: white; padding: 3px 10px; border-radius: 10px; font-size: 12px; display: inline-block; margin-bottom: 10px; }
+        .text { font-size: 14px; color: #666; line-height: 1.6; margin-bottom: 15px; white-space: pre-wrap; }
+        .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+        .tag { background: #f0f0f0; color: #666; padding: 4px 12px; border-radius: 12px; font-size: 12px; }
+        .btn { width: 100%; background: linear-gradient(135deg, #f093fb, #f5576c); color: white; border: none; padding: 12px; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; }
+        #debug { background: rgba(255,255,255,0.1); color: white; padding: 10px; margin: 10px 0; border-radius: 8px; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🔥 今日热点</h1>
+        <p>2026-01-13 19:09 | v2.0</p>
+    </div>
+    <div class="stats">📊 加载中...</div>
+    <div id="debug">等待数据...</div>
+    <div id="list"></div>
+
+    <script>
+        // 数据
+        const topics = [
+            {platform: "Hacker News", title: "Claude Code 推出 Cowork 功能", text: "Claude 推出 Cowork 功能！让 AI 协作更高效 💼\n\n🔥 核心特性：\n• 智能代码协作\n• 多任务并行处理\n• 实时代码审查\n• 自动化工作流\n\n开发者必备神器！效率提升300%！", heat: 990, tags: ["AI", "Claude", "编程", "效率工具"]},
+            {platform: "Hacker News", title: "苹果选择谷歌 Gemini 驱动 Siri", text: "苹果选择谷歌的 Gemini AI 来驱动 Siri 🍎🤖\n\n要点：\n• 苹果与谷歌达成AI合作\n• Gemini将集成到Siri中\n• 预计在iOS更新中推出\n\n科技圈炸锅了！", heat: 858, tags: ["苹果", "谷歌", "AI", "Siri"]},
+            {platform: "Hacker News", title: "软盘是最好的儿童电视遥控器", text: "软盘竟然是最好的儿童电视遥控器？💾📺\n\n😂 父母的智慧：\n• 软盘当遥控器，孩子抢不走\n• 简单易懂，没有复杂按钮\n• 耐用抗摔，经典设计", heat: 641, tags: ["育儿", "科技", "生活", "创意"]},
+            {platform: "今日头条", title: "中方就 G7 稀土言论表态", text: "中方就 G7 稀土言论表态 🇨🇳\n\n• G7 发表稀土相关言论\n• 中方迅速作出回应\n• 稀土资源战略重要性凸显\n\n维护国家资源利益！", heat: 5772, tags: ["新闻", "国际", "稀土", "G7"]},
+            {platform: "今日头条", title: "A股成交额突破3.64万亿", text: "A股成交额突破3.64万亿再创新高 📈\n\n• 市场交易火爆\n• 成交额创历史新高\n• 投资者热情高涨\n\n股市沸腾！", heat: 1573, tags: ["股市", "A股", "财经"]}
+        ];
+
+        // 渲染函数
+        function render() {
+            document.querySelector('.stats').textContent = '📊 共 ' + topics.length + ' 个热点话题';
+            document.getElementById('debug').textContent = '✅ JS已执行 | ' + new Date().toLocaleTimeString();
+
+            const listEl = document.getElementById('list');
+            listEl.innerHTML = topics.map(item => `
+                <div class="card">
+                    <span class="platform">${item.platform}</span>
+                    <div class="title">${item.title}</div>
+                    <div class="heat">🔥 热度 ${item.heat}</div>
+                    <div class="tags">${item.tags.map(t => `<span class="tag">#${t}</span>`).join('')}</div>
+                    <div class="text">${item.text}</div>
+                    <button class="btn" onclick="publish(${JSON.stringify(item).replace(/"/g, '&quot;')})">📱 发布到小红书</button>
+                </div>
+            `).join('');
+        }
+
+        // 唤醒小红书APP（多种方式尝试）
+        function openXiaohongshuApp() {
+            const schemes = [
+                'xhsdiscover://post_note/',      // 发布笔记
+                'xhsdiscover://post/',            // 发布作品（相册）
+                'xhsdiscover://',                 // 主页
+                'xhs://'                          // 备用scheme
+            ];
+
+            // 方法1：尝试使用iframe（避免直接跳转）
+            const iframe = document.createElement('iframe');
+            iframe.style.display = 'none';
+            iframe.style.width = '0';
+            iframe.style.height = '0';
+            document.body.appendChild(iframe);
+
+            let schemeIndex = 0;
+            function tryNextScheme() {
+                if (schemeIndex < schemes.length) {
+                    iframe.src = schemes[schemeIndex];
+                    schemeIndex++;
+                    setTimeout(tryNextScheme, 500);
+                } else {
+                    document.body.removeChild(iframe);
+                }
+            }
+
+            tryNextScheme();
+
+            // 方法2：直接跳转（iframe失败后的备用）
+            setTimeout(() => {
+                window.location.href = schemes[0];
+            }, 1000);
+
+            // 方法3：如果都失败，打开网页版
+            setTimeout(() => {
+                if (document.body.contains(iframe)) {
+                    document.body.removeChild(iframe);
+                }
+                window.open('https://www.xiaohongshu.com', '_blank');
+            }, 3000);
+        }
+
+        // 发布函数
+        async function publish(item) {
+            const text = `${item.title}\n\n${item.text}\n\n${item.tags.map(t => '#' + t).join(' ')}`;
+
+            // 方法1：使用 Clipboard API
+            if (navigator.clipboard && window.isSecureContext) {
+                try {
+                    await navigator.clipboard.writeText(text);
+                    alert('✅ 文字已复制到剪贴板！\n\n1. 打开小红书APP\n2. 粘贴文字\n3. 添加图片（可选）\n4. 发布');
+                    setTimeout(() => {
+                        openXiaohongshuApp();
+                    }, 1500);
+                    return;
+                } catch (err) {
+                    console.log('Clipboard API失败，使用备用方案:', err);
+                }
+            }
+
+            // 方法2：使用 textarea 复制（兼容所有浏览器）
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.select();
+            textarea.setSelectionRange(0, 99999); // iOS兼容
+
+            const successful = document.execCommand('copy');
+            document.body.removeChild(textarea);
+
+            if (successful) {
+                alert('✅ 文字已复制到剪贴板！\n\n1. 打开小红书APP\n2. 粘贴文字\n3. 添加图片（可选）\n4. 发布');
+                setTimeout(() => {
+                    openXiaohongshuApp();
+                }, 1500);
+            } else {
+                // 方法3：手动复制提示
+                prompt('请手动复制以下内容：', text);
+                setTimeout(() => {
+                    openXiaohongshuApp();
+                }, 2000);
+            }
+        }
+
+        // 立即执行
+        render();
+    </script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
+
+[deploy]
+startCommand = "python web_server.py"
+healthcheckPath = "/"
+
+[env]
+PORT = "5000"

@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>发布爆文</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .article-meta {
+            background: #f8f9fa;
+            padding: 12px 16px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .article-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+            line-height: 1.5;
+            margin-bottom: 16px;
+        }
+
+        .article-content {
+            font-size: 15px;
+            color: #666;
+            line-height: 1.8;
+            white-space: pre-wrap;
+            margin-bottom: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .image-section {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .image-preview {
+            width: 100%;
+            max-width: 400px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .image-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 14px;
+            border-radius: 8px;
+            border: none;
+            background: #f0f0f0;
+            color: #666;
+            cursor: pointer;
+        }
+
+        .btn-small:active {
+            transform: scale(0.95);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 12px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ff5252 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #666;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: white;
+        }
+
+        .spinner {
+            border: 3px solid rgba(255,255,255,0.3);
+            border-top: 3px solid white;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .success-message {
+            background: #4caf50;
+            color: white;
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .error-message {
+            background: #ff6b6b;
+            color: white;
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+            margin-bottom: 20px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔥 发布爆文</h1>
+            <p>一键发布到内容库</p>
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>加载爆文内容...</p>
+        </div>
+
+        <div id="content" style="display: none;">
+            <div class="success-message" id="success-message">
+                ✅ 发布成功！
+            </div>
+
+            <div class="error-message" id="error-message">
+                ❌ 发布失败
+            </div>
+
+            <!-- 操作按钮区 - 移到顶部 -->
+            <div class="card">
+                <h3 style="text-align: center; color: #333; margin-bottom: 16px; font-size: 18px;">
+                    🎯 快速发布
+                </h3>
+
+                <button class="btn btn-primary" onclick="publishToXiaohongshuApp()">
+                    📱 唤醒小红书APP发布
+                </button>
+
+                <button class="btn btn-secondary" onclick="publishToCompanyAPI()">
+                    🏢 保存到公司内容库
+                </button>
+
+                <button class="btn btn-secondary" onclick="copyContent()">
+                    📋 复制内容
+                </button>
+
+                <div style="margin-top: 16px; padding: 12px; background: #f0f7ff; border-radius: 8px; font-size: 12px; color: #666; line-height: 1.6;">
+                    💡 <strong>提示：</strong><br>
+                    📱 唤醒APP后，内容已复制，直接粘贴发布<br>
+                    🏢 保存成功后，可在公司系统查看笔记ID
+                </div>
+            </div>
+
+            <!-- 文章内容区 -->
+            <div class="card">
+                <div class="article-meta" id="article-meta">
+                    加载中...
+                </div>
+
+                <div class="article-title" id="article-title">
+                    加载中...
+                </div>
+
+                <!-- 配图区 -->
+                <div class="image-section" id="image-section" style="display: none;">
+                    <img id="article-image" class="image-preview" src="" alt="配图">
+                    <div class="image-actions">
+                        <button class="btn-small" onclick="downloadImage()">📥 下载配图</button>
+                        <button class="btn-small" onclick="copyImageLink()">🔗 复制图片链接</button>
+                    </div>
+                </div>
+
+                <div class="article-content" id="article-content">
+                    加载中...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = window.location.protocol + '//' + window.location.host;
+        let currentPost = null;
+
+        // 从URL获取文章ID和日期参数
+        const pathParts = window.location.pathname.split('/');
+        const postId = parseInt(pathParts[pathParts.length - 1], 10);  // 转换为整数
+
+        // 获取URL参数
+        const urlParams = new URLSearchParams(window.location.search);
+        const dateParam = urlParams.get('date') || '';
+
+        // 加载文章
+        async function loadPost() {
+            try {
+                // 构建API URL，如果有日期参数则添加
+                let url = `${API_BASE}/api/posts/${postId}`;
+                if (dateParam) {
+                    url += `?date=${dateParam}`;
+                }
+
+                const response = await fetch(url);
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    currentPost = result.data;
+                    displayPost(result.data);
+                } else {
+                    showError('加载失败: ' + result.message);
+                }
+            } catch (error) {
+                showError('网络错误: ' + error.message);
+            }
+        }
+
+        // 显示文章
+        function displayPost(post) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('content').style.display = 'block';
+
+            document.getElementById('article-meta').textContent =
+                `#${post.id} | ${post.category} | ${post.title_type} | ${post.platform}`;
+
+            document.getElementById('article-title').textContent = post.title;
+            document.getElementById('article-content').textContent = post.content;
+
+            // 生成配图
+            generateAndDisplayImage(post.title);
+        }
+
+        // 生成并显示配图
+        async function generateAndDisplayImage(title) {
+            try {
+                // 调用后端生成图片
+                const response = await fetch(`${API_BASE}/api/generate-image`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        title: title
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.status === 'success' && result.data.image_url) {
+                    // 显示图片
+                    const imageSection = document.getElementById('image-section');
+                    const articleImage = document.getElementById('article-image');
+
+                    articleImage.src = result.data.image_url;
+                    imageSection.style.display = 'block';
+
+                    // 保存图片URL供下载使用
+                    window.currentImageUrl = result.data.image_url;
+                }
+            } catch (error) {
+                console.log('图片生成失败:', error);
+                // 图片生成失败不影响显示，只是不显示图片区
+            }
+        }
+
+        // 下载配图
+        function downloadImage() {
+            if (!window.currentImageUrl) {
+                alert('图片未加载');
+                return;
+            }
+
+            // 创建下载链接
+            const link = document.createElement('a');
+            link.href = window.currentImageUrl;
+            link.download = `xiaohongshu_cover_${Date.now()}.png`;
+            link.target = '_blank';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // 复制图片链接
+        async function copyImageLink() {
+            if (!window.currentImageUrl) {
+                alert('图片未加载');
+                return;
+            }
+
+            try {
+                await navigator.clipboard.writeText(window.currentImageUrl);
+                alert('✅ 图片链接已复制！');
+            } catch (error) {
+                // 备用方法
+                const textarea = document.createElement('textarea');
+                textarea.value = window.currentImageUrl;
+                textarea.style.position = 'fixed';
+                textarea.style.opacity = '0';
+                document.body.appendChild(textarea);
+                textarea.select();
+                try {
+                    document.execCommand('copy');
+                    alert('✅ 图片链接已复制！');
+                } catch (err) {
+                    alert('❌ 复制失败');
+                }
+                document.body.removeChild(textarea);
+            }
+        }
+
+        // 唤醒小红书APP发布
+        async function publishToXiaohongshuApp() {
+            if (!currentPost) {
+                alert('内容未加载');
+                return;
+            }
+
+            // 显示加载中
+            const btn = event.target;
+            const originalText = btn.textContent;
+            btn.textContent = '⏳ 准备中...';
+            btn.disabled = true;
+
+            try {
+                // 1. 准备复制内容
+                let content = `${currentPost.title}\n\n${currentPost.content}`;
+
+                // 如果有图片，添加图片链接提示
+                if (window.currentImageUrl) {
+                    content += `\n\n📸 配图链接：${window.currentImageUrl}`;
+                    window.currentImageUrlForApp = window.currentImageUrl;
+                }
+
+                // 2. 复制内容到剪贴板
+                if (navigator.clipboard) {
+                    await navigator.clipboard.writeText(content);
+                } else {
+                    fallbackCopy(content);
+                }
+
+                // 3. 使用正确的小红书发布Scheme
+                // 参考官方方案：xhsdiscover://post 直接打开发布页面
+                const publishScheme = 'xhsdiscover://post';
+
+                document.getElementById('success-message').innerHTML =
+                    `✅ 内容已复制到剪贴板！<br><br>正在打开小红书发布页面...`;
+                document.getElementById('success-message').style.display = 'block';
+
+                // 延迟执行，确保复制完成
+                setTimeout(() => {
+                    // 方法1: 使用window.location直接跳转
+                    window.location.href = publishScheme;
+
+                    // 方法2: 使用iframe（备用方案，某些浏览器更支持）
+                    setTimeout(() => {
+                        const iframe = document.createElement('iframe');
+                        iframe.style.display = 'none';
+                        iframe.src = publishScheme;
+                        document.body.appendChild(iframe);
+
+                        // 2秒后移除iframe
+                        setTimeout(() => {
+                            if (iframe.parentNode) {
+                                document.body.removeChild(iframe);
+                            }
+                        }, 2000);
+                    }, 500);
+
+                    // 显示手动操作提示（以防APP未自动打开）
+                    setTimeout(() => {
+                        let instructions = `✅ 内容已复制！<br><br>
+                            📱 <strong>如果小红书没有自动打开：</strong><br><br>
+                            1️⃣ 手动打开小红书APP<br>
+                            2️⃣ 会自动进入发布页面<br>
+                            3️⃣ 长按输入框，选择"粘贴"<br>
+                            4️⃣ 点击发布<br><br>
+                            💡 内容已经复制好了，直接粘贴即可！`;
+
+                        if (window.currentImageUrlForApp) {
+                            instructions = `✅ 内容和图片链接已复制！<br><br>
+                                📱 <strong>如果小红书没有自动打开：</strong><br><br>
+                                1️⃣ 手动打开小红书APP<br>
+                                2️⃣ 会自动进入发布页面<br>
+                                3️⃣ 长按输入框，粘贴文字内容<br>
+                                4️⃣ 点击"添加图片"，上传下载的配图<br>
+                                5️⃣ 点击发布<br><br>
+                                💡 配图可以先点击上方"下载配图"按钮保存！`;
+                        }
+
+                        document.getElementById('success-message').innerHTML = instructions;
+                    }, 2000);
+
+                    setTimeout(() => {
+                        document.getElementById('success-message').style.display = 'none';
+                    }, 15000);
+
+                }, 500);
+
+            } catch (error) {
+                document.getElementById('error-message').textContent = '❌ 操作出错: ' + error.message;
+                document.getElementById('error-message').style.display = 'block';
+                setTimeout(() => {
+                    document.getElementById('error-message').style.display = 'none';
+                }, 5000);
+            } finally {
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.disabled = false;
+                }, 2000);
+            }
+        }
+
+        // 保存到公司API（重命名原函数）
+        async function publishToCompanyAPI() {
+            if (!currentPost) {
+                alert('内容未加载');
+                return;
+            }
+
+            if (!confirm('确认保存到公司内容库吗？')) {
+                return;
+            }
+
+            // 显示加载中
+            const btn = event.target;
+            const originalText = btn.textContent;
+            btn.textContent = '⏳ 保存中...';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch(`${API_BASE}/api/publish-to-company`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        post_id: postId,
+                        date: dateParam,
+                        generate_image: false
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    const noteId = result.data.company_response.data || '已创建';
+                    document.getElementById('success-message').innerHTML =
+                        `✅ 保存成功！<br>笔记ID: ${noteId}<br><br>💡 请登录公司管理系统查看和发布`;
+                    document.getElementById('success-message').style.display = 'block';
+                    setTimeout(() => {
+                        document.getElementById('success-message').style.display = 'none';
+                    }, 8000);
+                } else {
+                    document.getElementById('error-message').textContent = '❌ ' + result.message;
+                    document.getElementById('error-message').style.display = 'block';
+                    setTimeout(() => {
+                        document.getElementById('error-message').style.display = 'none';
+                    }, 5000);
+                }
+            } catch (error) {
+                document.getElementById('error-message').textContent = '❌ 保存出错: ' + error.message;
+                document.getElementById('error-message').style.display = 'block';
+                setTimeout(() => {
+                    document.getElementById('error-message').style.display = 'none';
+                }, 5000);
+            } finally {
+                btn.textContent = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        // 复制内容
+        function copyContent() {
+            if (!currentPost) {
+                alert('内容未加载');
+                return;
+            }
+
+            const content = `${currentPost.title}\n\n${currentPost.content}`;
+
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(content).then(() => {
+                    alert('✅ 已复制到剪贴板！\n\n可以粘贴到小红书发布了。');
+                }).catch(() => {
+                    fallbackCopy(content);
+                });
+            } else {
+                fallbackCopy(content);
+            }
+        }
+
+        // 备选复制方法
+        function fallbackCopy(text) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+                document.execCommand('copy');
+                alert('✅ 已复制到剪贴板！');
+            } catch (err) {
+                alert('❌ 复制失败，请手动复制');
+            }
+            document.body.removeChild(textarea);
+        }
+
+        // 显示错误
+        function showError(message) {
+            document.getElementById('loading').innerHTML = `<p>${message}</p>`;
+        }
+
+        // 页面加载时获取数据
+        window.onload = function() {
+            loadPost();
+        };
+    </script>
+</body>
+</html>

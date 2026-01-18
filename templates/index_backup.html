@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>内容生成器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: #000;
+            color: #fff;
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 60px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 300;
+            letter-spacing: 4px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 0.9rem;
+            color: #666;
+            letter-spacing: 2px;
+        }
+
+        .action-area {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .btn-generate {
+            background: #fff;
+            color: #000;
+            border: 2px solid #fff;
+            padding: 20px 60px;
+            font-size: 1rem;
+            font-weight: 600;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-generate:hover {
+            background: #000;
+            color: #fff;
+        }
+
+        .btn-generate:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .status {
+            text-align: center;
+            margin: 40px 0;
+            min-height: 60px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            max-width: 400px;
+            height: 2px;
+            background: #333;
+            margin: 20px auto;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #fff;
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        .status-text {
+            font-size: 0.9rem;
+            color: #999;
+            letter-spacing: 1px;
+        }
+
+        .content-section {
+            display: none;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        .history-toggle {
+            text-align: center;
+            margin: 40px 0;
+        }
+
+        .btn-history {
+            background: transparent;
+            color: #666;
+            border: 1px solid #333;
+            padding: 12px 30px;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-history:hover {
+            border-color: #fff;
+            color: #fff;
+        }
+
+        .history-controls {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .history-controls input[type="date"] {
+            background: transparent;
+            border: 1px solid #333;
+            color: #fff;
+            padding: 10px 15px;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+            cursor: pointer;
+        }
+
+        .history-controls input[type="date"]:hover {
+            border-color: #fff;
+        }
+
+        .history-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            border: 1px solid #333;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: #666;
+            letter-spacing: 1px;
+        }
+
+        .section-title {
+            font-size: 1.2rem;
+            font-weight: 300;
+            letter-spacing: 3px;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #333;
+        }
+
+        .post-card {
+            border: 1px solid #333;
+            padding: 30px;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+        }
+
+        .post-card:hover {
+            border-color: #fff;
+        }
+
+        .post-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .post-meta {
+            font-size: 0.8rem;
+            color: #666;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #222;
+        }
+
+        .post-meta span {
+            margin-right: 20px;
+            letter-spacing: 1px;
+        }
+
+        .post-content {
+            font-size: 0.95rem;
+            line-height: 1.8;
+            color: #ccc;
+            margin-bottom: 20px;
+            white-space: pre-wrap;
+        }
+
+        .post-actions {
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn-copy {
+            flex: 1;
+            padding: 12px;
+            background: transparent;
+            border: 1px solid #333;
+            color: #999;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-copy:hover {
+            border-color: #fff;
+            color: #fff;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+
+        .empty-state p {
+            font-size: 0.9rem;
+            letter-spacing: 2px;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 20px 15px;
+            }
+
+            .header h1 {
+                font-size: 1.5rem;
+            }
+
+            .btn-generate {
+                padding: 15px 40px;
+                font-size: 0.9rem;
+            }
+
+            .post-card {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>内容生成器</h1>
+            <p>CONTENT GENERATOR</p>
+        </div>
+
+        <div class="action-area">
+            <button class="btn-generate" id="generateBtn" onclick="generateAll()">
+                一键生成
+            </button>
+        </div>
+
+        <div class="status" id="statusArea">
+            <div class="progress-bar" id="progressBar" style="display: none;">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="status-text" id="statusText">等待开始...</div>
+        </div>
+
+        <div class="content-section" id="contentSection">
+            <div class="section-title">生成结果</div>
+            <div id="postsContainer"></div>
+        </div>
+
+        <div class="history-toggle">
+            <button class="btn-history" onclick="toggleHistory()">查看历史记录</button>
+        </div>
+
+        <div class="content-section" id="historySection">
+            <div class="section-title">历史记录</div>
+
+            <div class="history-controls">
+                <input type="date" id="historyDate" onchange="loadHistory()">
+            </div>
+
+            <div class="history-stats" id="historyStats">
+                <div class="stat-card">
+                    <div class="stat-number" id="statTopics">0</div>
+                    <div class="stat-label">热点话题</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="statPosts">0</div>
+                    <div class="stat-label">生成爆文</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="statFetchTasks">0</div>
+                    <div class="stat-label">抓取任务</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="statGenerateTasks">0</div>
+                    <div class="stat-label">生成任务</div>
+                </div>
+            </div>
+
+            <div id="historyContainer"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:5000/api';
+
+        async function generateAll() {
+            const btn = document.getElementById('generateBtn');
+            const statusArea = document.getElementById('statusArea');
+            const progressBar = document.getElementById('progressBar');
+            const progressFill = document.getElementById('progressFill');
+            const statusText = document.getElementById('statusText');
+            const contentSection = document.getElementById('contentSection');
+            const postsContainer = document.getElementById('postsContainer');
+
+            // 禁用按钮
+            btn.disabled = true;
+            btn.textContent = '生成中...';
+
+            // 显示进度
+            progressBar.style.display = 'block';
+            contentSection.classList.remove('active');
+
+            try {
+                // 步骤1: 抓取热点
+                updateStatus('正在抓取热点...', 10);
+                const fetchResult = await fetch(`${API_BASE}/fetch/start`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({async: false})
+                });
+                const fetchData = await fetchResult.json();
+
+                if (fetchData.status !== 'success') {
+                    throw new Error('抓取失败');
+                }
+
+                // 步骤2: 获取可用话题
+                updateStatus('正在筛选话题...', 50);
+                const topicsResult = await fetch(`${API_BASE}/generate/available-topics?limit=5`);
+                const topicsData = await topicsResult.json();
+
+                if (topicsData.status !== 'success' || topicsData.data.topics.length === 0) {
+                    throw new Error('没有可用话题');
+                }
+
+                // 步骤3: 生成爆文
+                updateStatus('正在生成内容...', 70);
+                const topicIds = topicsData.data.topics.slice(0, 3).map(t => t.id);
+                const generateResult = await fetch(`${API_BASE}/generate/start`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        topic_ids: topicIds,
+                        use_ai: false,
+                        async: false
+                    })
+                });
+                const generateData = await generateResult.json();
+
+                if (generateData.status !== 'success') {
+                    throw new Error('生成失败');
+                }
+
+                // 步骤4: 获取生成的爆文
+                updateStatus('正在加载内容...', 90);
+                const batchId = generateData.data.batch_id;
+                const postsResult = await fetch(`${API_BASE}/generate/posts?batch_id=${batchId}`);
+                const postsData = await postsResult.json();
+
+                if (postsData.status !== 'success') {
+                    throw new Error('加载内容失败');
+                }
+
+                // 步骤5: 显示结果
+                updateStatus('生成完成！', 100);
+                displayPosts(postsData.data.posts);
+
+                // 显示内容区域
+                setTimeout(() => {
+                    contentSection.classList.add('active');
+                    progressBar.style.display = 'none';
+                }, 500);
+
+            } catch (error) {
+                updateStatus(`错误: ${error.message}`, 0);
+                console.error(error);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '一键生成';
+            }
+        }
+
+        function updateStatus(text, progress) {
+            const statusText = document.getElementById('statusText');
+            const progressFill = document.getElementById('progressFill');
+
+            statusText.textContent = text;
+            if (progress !== undefined) {
+                progressFill.style.width = `${progress}%`;
+            }
+        }
+
+        function displayPosts(posts) {
+            const container = document.getElementById('postsContainer');
+
+            if (!posts || posts.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <p>暂无内容</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // 按话题分组
+            const grouped = {};
+            posts.forEach(post => {
+                const key = post.original_topic.substring(0, 30);
+                if (!grouped[key]) grouped[key] = [];
+                grouped[key].push(post);
+            });
+
+            let html = '';
+            let count = 0;
+
+            // 显示每个话题的第一篇爆文
+            for (const [topic, topicPosts] of Object.entries(grouped)) {
+                if (count >= 5) break; // 只显示5个话题
+
+                const post = topicPosts[0];
+                html += `
+                    <div class="post-card">
+                        <div class="post-title">${escapeHtml(post.recommended_title)}</div>
+                        <div class="post-meta">
+                            <span>${post.title_type}</span>
+                            <span>${post.source_platform}</span>
+                            <span>${new Date(post.generated_at).toLocaleDateString()}</span>
+                        </div>
+                        <div class="post-content">${escapeHtml(post.content)}</div>
+                        <div class="post-actions">
+                            <button class="btn-copy" onclick="copyPost(${post.id})">复制内容</button>
+                            <button class="btn-copy" onclick="copyAll(${post.id})">复制全部</button>
+                        </div>
+                    </div>
+                `;
+                count++;
+            }
+
+            container.innerHTML = html;
+        }
+
+        async function copyPost(postId) {
+            try {
+                const response = await fetch(`${API_BASE}/generate/posts/${postId}`);
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    const post = result.data;
+                    const text = `${post.recommended_title}\n\n${post.content}`;
+                    await navigator.clipboard.writeText(text);
+                    alert('已复制到剪贴板');
+                }
+            } catch (error) {
+                console.error(error);
+                alert('复制失败');
+            }
+        }
+
+        async function copyAll(postId) {
+            try {
+                const response = await fetch(`${API_BASE}/generate/posts/${postId}`);
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    const post = result.data;
+                    const text = `
+标题：${post.recommended_title}
+
+正文：
+${post.content}
+
+配图建议：
+${post.image_suggestions}
+
+视频建议：
+${post.video_suggestions}
+                    `.trim();
+                    await navigator.clipboard.writeText(text);
+                    alert('已复制全部内容（标题+正文+配图建议）');
+                }
+            } catch (error) {
+                console.error(error);
+                alert('复制失败');
+            }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function toggleHistory() {
+            const historySection = document.getElementById('historySection');
+            const btn = document.querySelector('.btn-history');
+
+            if (historySection.classList.contains('active')) {
+                historySection.classList.remove('active');
+                btn.textContent = '查看历史记录';
+            } else {
+                historySection.classList.add('active');
+                btn.textContent = '隐藏历史记录';
+
+                // 设置默认日期为今天
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('historyDate').value = today;
+                loadHistory();
+            }
+        }
+
+        async function loadHistory() {
+            const date = document.getElementById('historyDate').value;
+            if (!date) return;
+
+            try {
+                const response = await fetch(`${API_BASE}/history/data-chain?date=${date}`);
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    displayHistory(result.data);
+                }
+            } catch (error) {
+                console.error('加载历史记录失败:', error);
+            }
+        }
+
+        function displayHistory(data) {
+            // 更新统计数据
+            document.getElementById('statTopics').textContent = data.hot_topics.length;
+            document.getElementById('statPosts').textContent = data.viral_posts.length;
+            document.getElementById('statFetchTasks').textContent = data.fetch_tasks.length;
+            document.getElementById('statGenerateTasks').textContent = data.generate_tasks.length;
+
+            const container = document.getElementById('historyContainer');
+
+            if (data.viral_posts.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <p>该日期暂无数据</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // 显示历史爆文
+            let html = '';
+            for (const post of data.viral_posts.slice(0, 10)) {
+                html += `
+                    <div class="post-card">
+                        <div class="post-title">${escapeHtml(post.recommended_title)}</div>
+                        <div class="post-meta">
+                            <span>${post.title_type}</span>
+                            <span>${post.source_platform}</span>
+                            <span>${new Date(post.generated_at).toLocaleDateString()}</span>
+                        </div>
+                        <div class="post-content">${escapeHtml(post.content)}</div>
+                        <div class="post-actions">
+                            <button class="btn-copy" onclick="copyPost(${post.id})">复制内容</button>
+                            <button class="btn-copy" onclick="copyAll(${post.id})">复制全部</button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            container.innerHTML = html;
+        }
+
+        // 页面加载完成
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('Content Generator Ready');
+        });
+    </script>
+</body>
+</html>

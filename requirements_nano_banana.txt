@@ -1,0 +1,10 @@
+# Google Nano Banana (Gemini) 图片生成所需依赖
+
+# Google Generative AI SDK (可选，也可以直接用requests)
+google-generativeai>=0.8.0
+
+# HTTP请求库（通常已安装）
+requests>=2.31.0
+
+# Pillow - 图片处理（可选，用于进一步编辑）
+Pillow>=10.0.0

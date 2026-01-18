@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="format-detection" content="telephone=no">
+    <title>热点话题清单 - 小红书</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px 15px;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 25px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .stats {
+            text-align: center;
+            color: white;
+            font-size: 14px;
+            margin-bottom: 20px;
+            opacity: 0.9;
+        }
+
+        .content-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .content-card {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .content-card:active {
+            transform: scale(0.98);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .content-body {
+            padding: 15px;
+        }
+
+        .platform-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .content-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+
+        .content-meta {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+            font-size: 13px;
+            color: #999;
+        }
+
+        .heat-score {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 3px 10px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .link-icon {
+            color: #667eea;
+            text-decoration: none;
+            font-size: 13px;
+        }
+
+        .content-text {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .content-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .tag {
+            background: #f0f0f0;
+            color: #666;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .publish-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(240, 87, 108, 0.3);
+        }
+
+        .publish-btn:active {
+            transform: translateY(1px);
+            box-shadow: 0 2px 6px rgba(240, 87, 108, 0.3);
+        }
+
+        .publish-btn::before {
+            content: "📱 ";
+            margin-right: 5px;
+        }
+
+        .toast {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 12px;
+            font-size: 14px;
+            z-index: 1000;
+            display: none;
+            text-align: center;
+            max-width: 80%;
+        }
+
+        .toast.show {
+            display: block;
+            animation: fadeIn 0.3s, fadeOut 0.3s 2.7s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🔥 热点话题清单</h1>
+        <p>一键发布到小红书</p>
+    </div>
+
+    <div class="stats" id="stats"></div>
+
+    <div class="content-list" id="contentList"></div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // 热点话题数据
+        const hotTopics = [
+            {
+                id: 1,
+                platform: "Hacker News",
+                title: "Apple picks Google's Gemini to power Siri",
+                text: "苹果选择谷歌的 Gemini AI 来驱动 Siri，这是一个重大转变！🍎🤖\n\n要点：\n• 苹果与谷歌达成AI合作\n• Gemini将集成到Siri中\n• 预计在iOS更新中推出\n• 可能改变用户的AI助手体验\n\n科技圈炸锅了！你怎么看这个合作？",
+                image: null,
+                tags: ["苹果", "谷歌", "AI", "Siri", "科技"],
+                heat: 684,
+                link: "https://www.cnbc.com/2026/01/12/apple-google-ai-siri-gemini.html"
+            },
+            {
+                id: 2,
+                platform: "Hacker News",
+                title: "Cowork: Claude Code for the rest of your work",
+                text: "Claude推出Cowork功能！让AI协作更高效 💼\n\n🔥 核心特性：\n• 智能代码协作\n• 多任务并行处理\n• 实时代码审查\n• 自动化工作流\n\n开发者必备神器！效率提升300%！",
+                image: null,
+                tags: ["AI", "Claude", "编程", "效率工具"],
+                heat: 682,
+                link: "https://claude.com/blog/cowork-research-preview"
+            },
+            {
+                id: 3,
+                platform: "Hacker News",
+                title: "TimeCapsuleLLM: LLM trained only on data from 1800-1875",
+                text: "TimeCapsuleLLM - 只用1800-1875年数据训练的AI 📚\n\n🤯 硬核历史AI：\n• 工业革命时期的知识\n• 19世纪的思维方式\n• 古老的智慧结晶\n\n穿越时空的AI体验！来看看19世纪的人会怎么回答现代问题！",
+                image: null,
+                tags: ["AI", "历史", "LLM", "机器学习"],
+                heat: 505,
+                link: "https://github.com/haykgrigo3/TimeCapsuleLLM"
+            },
+            {
+                id: 4,
+                platform: "Hacker News",
+                title: "Floppy disks turn out to be the greatest TV remote for kids",
+                text: "软盘竟然是最好的儿童电视遥控器？💾📺\n\n😂 父母的智慧：\n• 软盘当遥控器，孩子抢不走\n• 简单易懂，没有复杂按钮\n• 耐用抗摔，经典设计\n\n这届父母的脑洞也太大了！有人试过吗？",
+                image: null,
+                tags: ["育儿", "科技", "生活", "创意"],
+                heat: 513,
+                link: "https://blog.smartere.dk/2026/01/floppy-disks-the-best-tv-remote-for-kids/"
+            },
+            {
+                id: 5,
+                platform: "Hacker News",
+                title: "Date is out, Temporal is in",
+                text: "JavaScript日期处理迎来革命！Temporal来了 📅✨\n\n🔥 新特性：\n• 解决Date的历史遗留问题\n• 更准确的时区处理\n• 人性化的API设计\n• 类型安全的日期操作\n\n前端开发者的福音！终于不用和Date斗智斗勇了！",
+                image: null,
+                tags: ["JavaScript", "前端开发", "编程", "Temporal"],
+                heat: 327,
+                link: "https://piccalil.li/blog/date-is-out-and-temporal-is-in/"
+            },
+            {
+                id: 6,
+                platform: "Hacker News",
+                title: "LLVM: The bad parts",
+                text: "LLVM的缺点与不足，深度解析 🔍\n\n⚠️ 主要问题：\n• 编译时间过长\n• 内存占用高\n• 调试困难\n• 学习曲线陡峭\n\n技术大佬的真实分享！来看看LLVM不为人知的一面...",
+                image: null,
+                tags: ["编程", "LLVM", "技术", "编译器"],
+                heat: 289,
+                link: "https://www.npopov.com/2026/01/11/LLVM-The-bad-parts.html"
+            },
+            {
+                id: 7,
+                platform: "Hacker News",
+                title: "Anthropic made a mistake in cutting off third-party clients",
+                text: "Anthropic承认错误：封禁第三方客户端是个失误 🤦‍♂️\n\n📜 事件回顾：\n• 限制第三方API访问\n• 引发开发者社区强烈反对\n• 现在决定撤销决定\n\n大厂也需要倾听用户声音！这件事你怎么看？",
+                image: null,
+                tags: ["AI", "Anthropic", "技术", "API"],
+                heat: 229,
+                link: "https://archaeologist.dev/artifacts/anthropic"
+            },
+            {
+                id: 8,
+                platform: "今日头条",
+                title: "数智化赋能中国制造持续转型升级",
+                text: "中国制造2025！数智化转型正当时 🏭🚀\n\n✨ 转型亮点：\n• 智能工厂遍地开花\n• 工业互联网深度融合\n• 数字化转型提速\n• 创新驱动发展\n\n中国制造向中国创造转变！科技强国在路上！",
+                image: null,
+                tags: ["中国制造", "数字化转型", "科技", "产业升级"],
+                heat: 0,
+                link: ""
+            },
+            {
+                id: 9,
+                platform: "今日头条",
+                title: "美报告承认中国电子战和导弹压过美军",
+                text: "美军报告承认：中国在电子战和导弹领域已超越 🎯\n\n📊 关键数据：\n• 电子战能力领先\n• 导弹技术优势明显\n• 区域拒止能力强大\n\n军事科技实力差距缩小！国防现代化成果显著！",
+                image: null,
+                tags: ["军事", "科技", "国防", "新闻"],
+                heat: 0,
+                link: ""
+            },
+            {
+                id: 10,
+                platform: "今日头条",
+                title: "中国一口气申报20万颗卫星意味什么",
+                text: "20万颗卫星！中国版星链计划曝光 🛰️🌍\n\n🔥 重大意义：\n• 全球互联网覆盖\n• 6G网络布局\n• 太空经济新赛道\n• 科技实力展示\n\n马斯克星链迎来强劲对手！太空竞争进入新阶段！",
+                image: null,
+                tags: ["卫星", "科技", "航天", "通信"],
+                heat: 0,
+                link: ""
+            },
+            {
+                id: 11,
+                platform: "B站",
+                title: "创造历史！国人首次打破世界纪录",
+                text: "48分钟通关泰拉瑞亚！中国玩家创造历史 🎮🏆\n\n⚡ 神级操作：\n• 全球最快通关记录\n• 团队配合天衣无缝\n• 技术含量爆表\n• 国人实力展示\n\n游戏圈沸腾了！这就是中国玩家的实力！",
+                image: null,
+                tags: ["游戏", "泰拉瑞亚", "世界纪录", "电竞"],
+                heat: 0,
+                link: ""
+            },
+            {
+                id: 12,
+                platform: "B站",
+                title: "名为电锯恶魔，实则'诞生恶魔'！",
+                text: "藤本树新发现！电锯恶魔的终极隐喻 🪚📖\n\n🔍 深度解读：\n• "诞生与支配"主题\n• 隐藏的象征意义\n• 剧情伏笔回收\n• 作者创作意图\n\n电锯粉必看！这才是真正的内涵！",
+                image: null,
+                tags: ["电锯人", "动漫", "剧情解读", "藤本树"],
+                heat: 0,
+                link: ""
+            },
+            {
+                id: 13,
+                platform: "Hacker News",
+                title: "Google removes AI health summaries after dangerous flaws",
+                text: "谷歌AI健康摘要因严重缺陷被紧急撤下 ⚠️🏥\n\n😱 问题暴露：\n• 医疗建议不准确\n• 存在危险误导\n• AI幻觉导致错误\n\nAI医疗还需谨慎！不能盲目相信AI，专业诊断很重要！",
+                image: null,
+                tags: ["AI", "谷歌", "医疗", "科技新闻"],
+                heat: 100,
+                link: "https://arstechnica.com/ai/2026/01/google-removes-some-ai-health-summaries-after-investigation-finds-dangerous-flaws/"
+            },
+            {
+                id: 14,
+                platform: "Hacker News",
+                title: "Postal Arbitrage - 邮费套利揭秘",
+                text: "邮费套利！没想到还能这么玩 💰📮\n\n💡 创意商机：\n• 利用邮费差价\n• 跨境套利策略\n• 物流成本优化\n\n商业模式无处不在！只有想不到，没有做不到！",
+                image: null,
+                tags: ["商业", "创意", "套利", "物流"],
+                heat: 295,
+                link: "https://walzr.com/postal-arbitrage"
+            }
+        ];
+
+        // 显示提示
+        function showToast(message, duration = 3000) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = 'toast show';
+            setTimeout(() => {
+                toast.className = 'toast';
+            }, duration);
+        }
+
+        // 复制文本到剪贴板
+        async function copyToClipboard(text) {
+            try {
+                if (navigator.clipboard && window.isSecureContext) {
+                    await navigator.clipboard.writeText(text);
+                    return true;
+                } else {
+                    const textArea = document.createElement('textarea');
+                    textArea.value = text;
+                    textArea.style.position = 'fixed';
+                    textArea.style.left = '-999999px';
+                    document.body.appendChild(textArea);
+                    textArea.focus();
+                    textArea.select();
+                    try {
+                        document.execCommand('copy');
+                        textArea.remove();
+                        return true;
+                    } catch (error) {
+                        textArea.remove();
+                        return false;
+                    }
+                }
+            } catch (error) {
+                console.error('复制失败:', error);
+                return false;
+            }
+        }
+
+        // 唤醒小红书App - 发布页面
+        function openXiaohongshu() {
+            // 使用官方文档的发布页面URL Scheme
+            const publishScheme = 'xhsdiscover://post_note/';
+
+            // 创建iframe尝试唤醒
+            const iframe = document.createElement('iframe');
+            iframe.style.display = 'none';
+            document.body.appendChild(iframe);
+            iframe.src = publishScheme;
+
+            setTimeout(() => {
+                document.body.removeChild(iframe);
+            }, 2000);
+
+            setTimeout(() => {
+                window.location.href = publishScheme;
+            }, 500);
+
+            setTimeout(() => {
+                window.open('https://www.xiaohongshu.com', '_blank');
+            }, 3000);
+        }
+
+        // 使用 Web Share API 分享
+        async function shareWithWebShare(item) {
+            if (!navigator.share) {
+                return false;
+            }
+
+            try {
+                const publishText = `${item.title}\n\n${item.text}\n\n${item.tags.map(tag => '#' + tag).join(' ')}`;
+
+                await navigator.share({
+                    title: item.title,
+                    text: publishText
+                });
+                return true;
+            } catch (error) {
+                console.log('Web Share 失败:', error);
+                return false;
+            }
+        }
+
+        // 发布到小红书
+        async function publishToXiaohongshu(item) {
+            const publishText = `${item.title}\n\n${item.text}\n\n${item.tags.map(tag => '#' + tag).join(' ')}`;
+
+            const shareSuccess = await shareWithWebShare(item);
+
+            if (shareSuccess) {
+                showToast('✅ 分享成功！');
+                return;
+            }
+
+            const copySuccess = await copyToClipboard(publishText);
+
+            if (copySuccess) {
+                showToast('✅ 文字已复制！正在打开小红书...', 2000);
+
+                setTimeout(() => {
+                    showToast('📱 正在打开小红书发布页面...', 2000);
+                    openXiaohongshu();
+                }, 1000);
+            } else {
+                showToast('❌ 复制失败，请手动复制内容');
+            }
+        }
+
+        // 渲染内容卡片
+        function renderContentCard(item) {
+            return `
+                <div class="content-card">
+                    <div class="content-body">
+                        <span class="platform-badge">${item.platform}</span>
+                        <h3 class="content-title">${item.title}</h3>
+                        <div class="content-meta">
+                            ${item.heat > 0 ? `<span class="heat-score">🔥 热度 ${item.heat}</span>` : ''}
+                            ${item.link ? `<a href="${item.link}" target="_blank" class="link-icon">📎 查看原文</a>` : ''}
+                        </div>
+                        <div class="content-tags">
+                            ${item.tags.map(tag => `<span class="tag">#${tag}</span>`).join('')}
+                        </div>
+                        <p class="content-text">${item.text}</p>
+                        <button class="publish-btn" onclick="publishToXiaohongshu(${JSON.stringify(item).replace(/"/g, '&quot;')})">
+                            发布到小红书
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 初始化页面
+        function init() {
+            console.log('开始初始化页面...');
+
+            const contentList = document.getElementById('contentList');
+            const statsDiv = document.getElementById('stats');
+
+            if (!contentList) {
+                console.error('找不到 contentList 元素');
+                return;
+            }
+
+            // 显示统计信息
+            statsDiv.innerHTML = `📊 共 ${hotTopics.length} 个热点话题`;
+
+            console.log('开始渲染数据...');
+            contentList.innerHTML = hotTopics.map(item => renderContentCard(item)).join('');
+            console.log('页面加载完成！');
+        }
+
+        // 页面加载时执行
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+    </script>
+</body>
+</html>

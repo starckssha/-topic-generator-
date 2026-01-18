@@ -1,0 +1,26 @@
+# Web Framework
+Flask>=3.0.0
+Flask-CORS>=4.0.0
+
+# Database
+pymysql>=1.1.0
+psycopg2-binary>=2.9.0  # PostgreSQL支持 (Railway)
+
+# HTTP Requests
+requests>=2.31.0
+
+# HTML Parsing
+beautifulsoup4>=4.12.0
+lxml>=5.1.0
+
+# Date/Time
+python-dateutil>=2.8.0
+
+# Data Analysis (可选)
+pandas>=1.5.0
+
+# UI (可选，如果不用streamlit可删除)
+streamlit>=1.28.0
+
+# Task Scheduling
+APScheduler>=3.10.0
