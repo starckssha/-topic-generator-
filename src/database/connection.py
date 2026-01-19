@@ -3,6 +3,7 @@
 """
 from contextlib import contextmanager
 import os
+import sys
 
 # 数据库类型自动检测
 DB_TYPE = os.getenv('DB_TYPE', 'postgresql' if os.getenv('RAILWAY_ENVIRONMENT') else 'mysql')
@@ -25,13 +26,15 @@ else:
         print("⚠️ MySQL驱动未安装，请运行: pip install pymysql")
 
 
-# 数据库配置
+# 数据库配置从config或环境变量读取
+from config import CONFIG as APP_CONFIG
+
 DB_CONFIG = {
-    'host': os.getenv('DB_HOST', 'sh-cdb-qkm4h7s0.sql.tencentcdb.com'),
-    'port': int(os.getenv('DB_PORT', '5432' if DB_TYPE == 'postgresql' else '27339')),
-    'user': os.getenv('DB_USER', 'postgres' if DB_TYPE == 'postgresql' else 'root'),
-    'password': os.getenv('DB_PASSWORD', ''),
-    'database': os.getenv('DB_NAME', 'topic_generator'),
+    'host': os.getenv('DB_HOST', APP_CONFIG.get('db_host', 'sh-cdb-qkm4h7s0.sql.tencentcdb.com')),
+    'port': int(os.getenv('DB_PORT', APP_CONFIG.get('db_port', 5432 if DB_TYPE == 'postgresql' else 27339))),
+    'user': os.getenv('DB_USER', APP_CONFIG.get('db_user', 'postgres' if DB_TYPE == 'postgresql' else 'root')),
+    'password': os.getenv('DB_PASSWORD', APP_CONFIG.get('db_password', '')),
+    'database': os.getenv('DB_NAME', APP_CONFIG.get('db_name', 'topic_generator')),
 }
 
 # PostgreSQL额外配置

@@ -6,6 +6,13 @@ CONFIG = {
     'youtube_api_key': 'AIzaSyC8tCzhNoIYyUq8q9muz3Dqe3VR0A41wvk',
     'deepseek_api_key': 'sk-aXWs0YDBq79J7Xx59aD6993bCa4e4a86813eE2Fa1eFd110d',
 
+    # 数据库配置
+    'db_host': 'sh-cdb-qkm4h7s0.sql.tencentcdb.com',
+    'db_port': 27339,
+    'db_user': 'root',
+    'db_password': 'sx@123456',  # 你的腾讯云数据库密码
+    'db_name': 'topic_generator',
+
     # 代理配置（用于访问YouTube/Twitter等需要VPN的服务）
     # 如果你的VPN端口不是7890，请修改为你的端口
     # 常见端口：7890(Clash), 10808, 10809, 7891等
