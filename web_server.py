@@ -428,11 +428,24 @@ if __name__ == '__main__':
     logger.info("=" * 70)
     logger.info("🚀 热点抓取与爆文生成系统")
     logger.info("=" * 70)
-    logger.info("📊 主页: http://localhost:5000/")
-    logger.info("📥 抓取管理: http://localhost:5000/fetch")
-    logger.info("📝 生成管理: http://localhost:5000/generate")
-    logger.info("📜 历史查询: http://localhost:5000/history")
+
+    # 从环境变量读取端口（Railway要求）
+    port = int(os.getenv('PORT', 5000))
+    logger.info(f"📊 主页: http://0.0.0.0:{port}/")
+    logger.info("📥 抓取管理: /fetch")
+    logger.info("📝 生成管理: /generate")
+    logger.info("📜 历史查询: /history")
     logger.info("=" * 70)
     logger.info("")
 
-    app.run(host='0.0.0.0', port=5000, debug=False)
+    # 测试数据库连接
+    try:
+        if test_connection():
+            logger.info("✅ 数据库连接成功")
+        else:
+            logger.warning("⚠️ 数据库连接失败，但服务仍会启动")
+    except Exception as e:
+        logger.warning(f"⚠️ 数据库连接测试失败: {e}")
+
+    # 启动Flask应用
+    app.run(host='0.0.0.0', port=port, debug=False)
